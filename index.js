@@ -13,10 +13,10 @@ bcrypt.hash("admin123", 10).then(hashedPassword => {
   users.push({
     id: 1,
     name: "Admin",
-    email: "admin@example.com",
+    email: "admin@gmail.com",
     password: hashedPassword
   });
-  console.log("✅ Default admin user added");
+  console.log("Default admin user added");
 });
 
 function authenticateToken(req, res, next) {
@@ -34,10 +34,10 @@ function authenticateToken(req, res, next) {
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   const user = users.find(u => u.email === email);
-  if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+  if (!user) return res.status(400).json({ message: 'Invalid inputs' });
 
   const validPass = await bcrypt.compare(password, user.password);
-  if (!validPass) return res.status(400).json({ message: 'Invalid credentials' });
+  if (!validPass) return res.status(400).json({ message: 'Invalid inputs' });
 
   const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '1h' });
   res.json({ token });
