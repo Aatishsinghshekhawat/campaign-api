@@ -2,6 +2,7 @@ CREATE DATABASE origin;
 
 USE origin;
 
+
 CREATE TABLE `user` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50),
@@ -39,6 +40,8 @@ CREATE TABLE list_item (
     modifiedDate DATETIME,
     FOREIGN KEY (list_id) REFERENCES list(id)
 );
+ALTER TABLE user ADD COLUMN mobile BIGINT;
 
-SELECT * FROM user WHERE email = 'aatish@gmail.com';
+
+
 
