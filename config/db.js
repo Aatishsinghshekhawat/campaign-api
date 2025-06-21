@@ -9,14 +9,12 @@ const connection = mysql.createConnection({
   database: process.env.DB_NAME
 });
 
-
 connection.connect(err => {
   if (err) throw err;
-  console.log("Connected to MySQL database 'origin'");
+  console.log("Connected to MySQL database");
 });
 
 module.exports = {
-  connection,           
-  promise: connection.promise() 
+  connection,
+  promise: connection.promise()
 };
-

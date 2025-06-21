@@ -1,5 +1,4 @@
 const express = require('express');
-const app = express();
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -7,12 +6,13 @@ const bcrypt = require('bcryptjs');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const { connection: db } = require('./config/db');
+const authenticateToken = require('./middleware/authMiddleware');
 
 dotenv.config();
+const app = express();
 app.use(express.json());
 
 const defaultRole = {
-  id: 1,
   title: 'Admin',
   createdDate: new Date(),
   modifiedDate: new Date()
@@ -29,36 +29,31 @@ const defaultAdmin = {
   modifiedDate: new Date()
 };
 
-db.query('SELECT id FROM role WHERE id = ?', [defaultRole.id], (err, roleResult) => {
+db.query('SELECT id FROM role WHERE id = 1', (err, roleResult) => {
   if (err) return console.error('MySQL SELECT role error:', err);
-
   if (roleResult.length === 0) {
     db.query(
       'INSERT INTO role (title, createdDate, modifiedDate) VALUES (?, ?, ?)',
       [defaultRole.title, defaultRole.createdDate, defaultRole.modifiedDate],
-      (err, insertRoleResult) => {
+      (err) => {
         if (err) return console.error('MySQL INSERT role error:', err);
         console.log('Default role inserted');
         insertAdmin();
       }
     );
   } else {
-    console.log('Default role already exists');
-    insertAdmin(); 
+    insertAdmin();
   }
 });
 
 function insertAdmin() {
   bcrypt.hash(defaultAdmin.password, 10).then(hash => {
-
     db.query('SELECT id FROM user WHERE email = ?', [defaultAdmin.email], (err, userResult) => {
       if (err) return console.error('MySQL SELECT user error:', err);
-
       if (userResult.length === 0) {
         db.query(
-          `INSERT INTO user (
-            name, email, password, mobileCountryCode, mobile, role_id, createdDate, modifiedDate
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO user (name, email, password, mobileCountryCode, mobile, role_id, createdDate, modifiedDate)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             defaultAdmin.name,
             defaultAdmin.email,
@@ -69,25 +64,20 @@ function insertAdmin() {
             defaultAdmin.createdDate,
             defaultAdmin.modifiedDate
           ],
-          (err, insertUserResult) => {
+          (err) => {
             if (err) return console.error('MySQL INSERT user error:', err);
-            console.log('Default admin user inserted into DB');
+            console.log('Default admin user inserted');
           }
         );
-      } else {
-        console.log('Admin already exists in DB');
       }
     });
   });
 }
 
-app.get('/', (req, res) => {
-  res.send('API is running!');
-});
-
+app.get('/', (req, res) => res.send('API is running!'));
 app.use('/auth', authRoutes);
-app.use('/user', userRoutes);
-
+app.use('/user', authenticateToken, userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
