@@ -5,12 +5,15 @@ const bcrypt = require('bcryptjs');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const listRoutes = require('./routes/listRoutes');
+const listItemRoutes = require('./routes/listItemRoutes'); 
 const { connection: db } = require('./config/db');
 const authenticateToken = require('./middleware/authMiddleware');
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+
 
 const defaultRole = {
   title: 'Admin',
@@ -75,9 +78,12 @@ function insertAdmin() {
 }
 
 app.get('/', (req, res) => res.send('API is running!'));
-app.use('/auth', authRoutes);
-app.use('/user', authenticateToken, userRoutes);
+
+
+app.use('/auth', authRoutes);                            
+app.use('/user', authenticateToken, userRoutes);         
+app.use('/list', authenticateToken, listRoutes);         
+app.use('/list/item', authenticateToken, listItemRoutes); 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
