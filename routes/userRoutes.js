@@ -7,6 +7,8 @@ const { validateUserCreation } = require('../validators/userValidator');
 
 router.post('/add', authenticateToken, validateUserCreation, validateRequest, userController.addUser);
 router.get('/list', authenticateToken, userController.listUsers);
+router.get('/user/:id', authenticateToken, userController.listUsers);
+
 
 module.exports = router;
 
