@@ -22,7 +22,7 @@ exports.addUser = async (data) => {
       }
     );
   });
-};
+};  
 
 exports.listUsers = async ({ name, email, roleId, page = 1, limit = 10 }) => {
   const offset = (page - 1) * limit;

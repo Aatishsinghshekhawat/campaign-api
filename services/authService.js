@@ -15,7 +15,7 @@ exports.loginUser = (email, password) => {
       if (!isMatch) return reject(new Error('Invalid password'));
 
       const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-        expiresIn: '12h',
+        expiresIn: '7d',
       });
 
       resolve(token);
