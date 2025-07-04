@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -15,6 +16,12 @@ const app = express();
 app.use(express.json());
 
 
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+
+
 const defaultRole = {
   title: 'Admin',
   createdDate: new Date(),
@@ -26,7 +33,7 @@ const defaultAdmin = {
   email: 'admin@gmail.com',
   password: 'Aaaa',
   mobileCountryCode: 91,
-  mobile: 0,
+  mobile: 8595136039,
   roleId: 1,
   createdDate: new Date(),
   modifiedDate: new Date()
