@@ -22,7 +22,7 @@ exports.login = (req, res) => {
     if (!isMatch) return res.status(401).json({ message: 'Invalid mobile or password' });
 
     const token = jwt.sign({ id: user.id, role: user.role_id }, process.env.JWT_SECRET, {
-      expiresIn: '1d'
+      expiresIn: '7d'
     });
 
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, roleId: user.role_id } });

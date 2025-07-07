@@ -22,38 +22,53 @@ exports.addUser = async (data) => {
       }
     );
   });
-};  
+};
 
-exports.listUsers = async ({ name, email, roleId, page = 1, limit = 10 }) => {
-  const offset = (page - 1) * limit;
-  const filters = [];
-  const values = [];
-
-  if (name) {
-    filters.push('name LIKE ?');
-    values.push(`%${name}%`);
-  }
-  if (email) {
-    filters.push('email LIKE ?');
-    values.push(`%${email}%`);
-  }
-  if (roleId) {
-    filters.push('role_id = ?');
-    values.push(roleId);
-  }
-
-  const where = filters.length ? 'WHERE ' + filters.join(' AND ') : '';
-  const query = `SELECT id, name, email, role_id, mobile, createdDate, modifiedDate FROM user ${where} LIMIT ? OFFSET ?`;
-  const countQuery = `SELECT COUNT(*) AS total FROM user ${where}`;
-
+exports.listUsers = ({ page = 1, limit = 10, name, mobile }) => {
   return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+
+    let filters = [];
+    let values = [];
+
+    if (name) {
+      filters.push(`u.name LIKE ?`);
+      values.push(`%${name}%`);
+    }
+
+    if (mobile) {
+      filters.push(`CONCAT(u.mobileCountryCode, u.mobile) LIKE ?`);
+      values.push(`%${mobile}%`);
+    }
+
+    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+
+    const dataQuery = `
+      SELECT u.id, u.name, u.email, u.mobileCountryCode, u.mobile, u.role_id, r.title AS roleTitle
+      FROM user u
+      JOIN role r ON u.role_id = r.id
+      ${whereClause}
+      LIMIT ? OFFSET ?
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM user u
+      ${whereClause}
+    `;
+
     db.query(countQuery, values, (err, countResult) => {
       if (err) return reject(err);
       const total = countResult[0].total;
 
-      db.query(query, [...values, +limit, +offset], (err, results) => {
+      db.query(dataQuery, [...values, parseInt(limit), parseInt(offset)], (err, data) => {
         if (err) return reject(err);
-        resolve({ users: results, total, page: +page, limit: +limit });
+        resolve({
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          users: data,
+        });
       });
     });
   });
