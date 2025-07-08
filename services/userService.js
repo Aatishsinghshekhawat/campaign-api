@@ -31,12 +31,14 @@ exports.listUsers = ({ page = 1, limit = 10, name, mobile }) => {
     let filters = [];
     let values = [];
 
-    if (name) {
+    // Filter by name only if it's not empty or whitespace
+    if (name && name.trim() !== '') {
       filters.push(`u.name LIKE ?`);
       values.push(`%${name}%`);
     }
 
-    if (mobile) {
+    // Filter by mobile (combined country code + mobile) only if not empty
+    if (mobile && mobile.trim() !== '') {
       filters.push(`CONCAT(u.mobileCountryCode, u.mobile) LIKE ?`);
       values.push(`%${mobile}%`);
     }
@@ -57,10 +59,12 @@ exports.listUsers = ({ page = 1, limit = 10, name, mobile }) => {
       ${whereClause}
     `;
 
+    // Get total count first
     db.query(countQuery, values, (err, countResult) => {
       if (err) return reject(err);
       const total = countResult[0].total;
 
+      // Now get paginated user data
       db.query(dataQuery, [...values, parseInt(limit), parseInt(offset)], (err, data) => {
         if (err) return reject(err);
         resolve({
