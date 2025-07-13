@@ -1,4 +1,5 @@
 const { connection: db } = require('../config/db');
+const listService = require('../services/listService');
 
 exports.addList = (req, res) => {
   const { name } = req.body;
@@ -51,4 +52,14 @@ exports.filterLists = (req, res) => {
       res.json({ total, page: +page, limit: +limit, lists: result });
     });
   });
+};
+
+
+exports.listLists = async (req, res) => {
+  try {
+    const result = await listService.listLists(req.query);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };

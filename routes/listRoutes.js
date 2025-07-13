@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const listController = require('../controllers/listController');
 const authenticateToken = require('../middleware/authMiddleware');
+router.get('/filter', authenticateToken, listController.listLists);
 
 router.get('/filter', authenticateToken, listController.filterLists);
 router.post('/add', authenticateToken, listController.addList);
