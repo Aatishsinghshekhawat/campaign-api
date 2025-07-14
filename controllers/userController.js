@@ -18,16 +18,14 @@ exports.listUsers = async (req, res) => {
   }
 };
 
-
-exports.getUserById = (req, res) => {
+exports.getUserById = async (req, res) => {
   const userId = req.params.id;
-  const sql = 'SELECT id, name, email, role_id, mobile, createdDate, modifiedDate FROM user WHERE id = ?';
-
-  db.query(sql, [userId], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error fetching user', error: err });
-    if (!result.length) return res.status(404).json({ message: 'User not found' });
-    res.json(result[0]);
-  });
+  try {
+    const user = await userService.getUserById(userId);
+    res.json(user);
+  } catch (error) {
+    res.status(404).json({ message: 'User not found', error: error.message });
+  }
 };
 
 exports.updateUser = (req, res) => {
@@ -37,8 +35,29 @@ exports.updateUser = (req, res) => {
 
   const sql = `UPDATE user SET name = ?, email = ?, mobileCountryCode = ?, mobile = ?, role_id = ?, modifiedDate = ? WHERE id = ?`;
 
-  db.query(sql, [name, email, mobileCountryCode, mobile, roleId, modifiedDate, userId], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Update failed', error: err });
-    res.json({ message: 'User updated successfully' });
-  });
+  const { connection: db } = require('../config/db');
+  db.query(
+    sql,
+    [name, email, mobileCountryCode, mobile, roleId, modifiedDate, userId],
+    (err, result) => {
+      if (err) return res.status(500).json({ message: 'Update failed', error: err });
+      res.json({ message: 'User updated successfully' });
+    }
+  );
+};
+
+exports.deleteUser = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await userService.getUserById(userId);
+    if (user.email === 'admin@gmail.com') {
+      return res.status(403).json({ message: 'Cannot delete admin user' });
+    }
+
+    await userService.deleteUser(userId);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Deletion failed', error: error.message });
+  }
 };

@@ -6,11 +6,19 @@ const validateRequest = require('../middleware/validateRequest');
 const { validateUserCreation } = require('../validators/userValidator');
 
 router.get('/list', authenticateToken, userController.listUsers);
-router.post('/add', authenticateToken, validateUserCreation, validateRequest, userController.addUser);
-router.put('/add/:id', authenticateToken, userController.updateUser); 
+
+router.post(
+  '/add',
+  authenticateToken,
+  validateUserCreation,
+  validateRequest,
+  userController.addUser
+);
+
+router.put('/add/:id', authenticateToken, userController.updateUser);
+
 router.get('/:id', authenticateToken, userController.getUserById);
 
-
+router.delete('/:id', authenticateToken, userController.deleteUser);
 
 module.exports = router;
-
