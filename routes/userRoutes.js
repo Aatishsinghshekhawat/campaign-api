@@ -5,7 +5,7 @@ const authenticateToken = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 const { validateUserCreation } = require('../validators/userValidator');
 
-router.get('/list', authenticateToken, userController.listUsers);
+router.post('/list', authenticateToken, userController.listUsers);
 
 router.post(
   '/add',
@@ -17,7 +17,7 @@ router.post(
 
 router.put('/add/:id', authenticateToken, userController.updateUser);
 
-router.get('/:id', authenticateToken, userController.getUserById);
+router.post('/:id', authenticateToken, userController.getUserById);
 
 router.delete('/:id', authenticateToken, userController.deleteUser);
 

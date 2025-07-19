@@ -37,8 +37,6 @@ exports.filterListItems = async (req, res) => {
   }
 };
 
-// Temporarily disabled CSV upload handler
-// exports.uploadCSV = (req, res) => { ... };
 
 exports.getListMetaById = async (req, res) => {
   try {

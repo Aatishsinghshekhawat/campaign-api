@@ -39,7 +39,7 @@ exports.getListById = (req, res) => {
 
 exports.listLists = async (req, res) => {
   try {
-    const result = await listService.listLists(req.query);
+    const result = await listService.listLists(req.body);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
