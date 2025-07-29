@@ -1,33 +1,73 @@
 const { connection: db } = require('../config/db');
 
-exports.listLists = ({ page = 1, limit = 10 }) => {
-  return new Promise((resolve, reject) => {
+exports.list = ({ page = 1, limit = 10 }) => 
+  new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
-
-    const countQuery = `SELECT COUNT(*) AS total FROM list`;
-
-    const dataQuery = `
-      SELECT l.id, l.name, l.createdDate, COUNT(li.id) AS audienceCount
+    const countSql = 'SELECT COUNT(*) AS total FROM list';
+    const dataSql = `
+      SELECT l.id, l.name, l.createdDate,
+             (SELECT COUNT(*) FROM list_item WHERE list_id = l.id) AS audienceCount
       FROM list l
-      LEFT JOIN list_item li ON l.id = li.list_id
-      GROUP BY l.id
       ORDER BY l.id DESC
-      LIMIT ? OFFSET ?
-    `;
+      LIMIT ? OFFSET ?`;
 
-    db.query(countQuery, (err, countResult) => {
+    db.query(countSql, (err, countResult) => {
       if (err) return reject(err);
       const total = countResult[0].total;
 
-      db.query(dataQuery, [parseInt(limit), parseInt(offset)], (err, data) => {
+      db.query(dataSql, [limit, offset], (err, data) => {
         if (err) return reject(err);
-        resolve({
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          lists: data
+        resolve({ total, page, limit, lists: data });
+      });
+    });
+  });
+
+exports.getListWithItems = (id) =>
+  new Promise((resolve, reject) => {
+    const listSql = 'SELECT id, name, createdDate FROM list WHERE id = ?';
+    const itemsSql = 'SELECT id, email, variables, status, createdDate FROM list_item WHERE list_id = ? ORDER BY createdDate DESC';
+
+    db.query(listSql, [id], (err, listResults) => {
+      if (err) return reject(err);
+      if (!listResults.length) return reject(new Error('List not found'));
+
+      db.query(itemsSql, [id], (err, itemsResults) => {
+        if (err) return reject(err);
+
+        const list = listResults[0];
+        list.items = itemsResults.map(item => {
+          let variables = {};
+          try {
+            variables = item.variables ? JSON.parse(item.variables) : {};
+          } catch {
+            variables = {};
+          }
+          return {
+            id: item.id,
+            email: item.email,
+            name: variables.Name || '',
+            status: item.status || 'valid',
+            createdDate: item.createdDate,
+          };
+        });
+
+        list.audienceCount = itemsResults.length;
+
+        resolve(list);
+      });
+    });
+  });
+
+exports.delete = (id) => 
+  new Promise((resolve, reject) => {
+    db.beginTransaction(err => {
+      if (err) return reject(err);
+      db.query('DELETE FROM list_item WHERE list_id = ?', [id], err => {
+        if (err) return db.rollback(() => reject(err));
+        db.query('DELETE FROM list WHERE id = ?', [id], err => {
+          if (err) return db.rollback(() => reject(err));
+          db.commit(err => err ? db.rollback(() => reject(err)) : resolve());
         });
       });
     });
   });
-};

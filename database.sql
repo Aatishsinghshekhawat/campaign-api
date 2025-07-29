@@ -43,5 +43,13 @@ CREATE TABLE list_item (
 ALTER TABLE user ADD COLUMN mobile BIGINT;
 
 
+CREATE TABLE template (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    content TEXT,
+    status ENUM('enabled', 'disabled') DEFAULT 'enabled',
+    createdDate DATETIME,
+    modifiedDate DATETIME
+);
 
 

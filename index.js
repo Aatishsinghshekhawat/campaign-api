@@ -10,6 +10,7 @@ const listRoutes = require('./routes/listRoutes');
 const listItemRoutes = require('./routes/listItemRoutes'); 
 const { connection: db } = require('./config/db');
 const authenticateToken = require('./middleware/authMiddleware');
+const templateRoutes = require('./routes/templateRoutes');
 
 dotenv.config();
 const app = express();
@@ -91,6 +92,7 @@ app.use('/auth', authRoutes);
 app.use('/user', authenticateToken, userRoutes);         
 app.use('/list', authenticateToken, listRoutes);         
 app.use('/list/item', authenticateToken, listItemRoutes); 
+app.use('/template', authenticateToken, templateRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

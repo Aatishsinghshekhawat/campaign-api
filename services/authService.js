@@ -22,3 +22,29 @@ exports.loginUser = (email, password) => {
     });
   });
 };
+
+exports.listLists = ({ page = 1, limit = 10 }) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+
+    const dataQuery = `
+      SELECT id, name, createdDate, modifiedDate
+      FROM list
+      ORDER BY createdDate DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const countQuery = `SELECT COUNT(*) AS total FROM list`;
+
+    db.query(dataQuery, [parseInt(limit), parseInt(offset)], (err, results) => {
+      if (err) return reject(err);
+
+      db.query(countQuery, (countErr, countResults) => {
+        if (countErr) return reject(countErr);
+
+        const total = countResults[0]?.total || 0;
+        resolve({ data: results, total });
+      });
+    });
+  });
+};
