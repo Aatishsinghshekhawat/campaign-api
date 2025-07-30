@@ -51,5 +51,20 @@ CREATE TABLE template (
     createdDate DATETIME,
     modifiedDate DATETIME
 );
+ALTER TABLE list_item
+ADD COLUMN status ENUM('valid', 'invalid', 'duplicate', 'archived') NOT NULL DEFAULT 'valid';
+
+CREATE TABLE campaign (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  channel VARCHAR(50) DEFAULT NULL,
+  status VARCHAR(50) DEFAULT NULL,
+  startDate DATETIME DEFAULT NULL,
+  `repeat` TINYINT DEFAULT 0,
+  createdDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+  modifiedDate DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  isDeleted TINYINT DEFAULT 0
+);
 
 
+DROP TABLE IF EXISTS campaign;
