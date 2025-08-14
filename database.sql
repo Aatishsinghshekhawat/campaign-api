@@ -66,5 +66,13 @@ CREATE TABLE campaign (
   isDeleted TINYINT DEFAULT 0
 );
 
+ALTER TABLE campaign
+  ADD COLUMN audienceListId INT NULL AFTER `repeat`,
+  ADD COLUMN recipientsTo JSON NULL AFTER audienceListId,
+  ADD COLUMN recipientsCc JSON NULL AFTER recipientsTo,
+  ADD COLUMN recipientsBcc JSON NULL AFTER recipientsCc,
+  ADD COLUMN templateId INT NULL AFTER recipientsBcc,
+  ADD COLUMN repeatFrequency ENUM('Day','Week','Month') NULL AFTER templateId,
+  ADD COLUMN repeatEndType ENUM('never','on') NULL AFTER repeatFrequency,
+  ADD COLUMN repeatEndDate DATE NULL AFTER repeatEndType;
 
-DROP TABLE IF EXISTS campaign;
